@@ -2,7 +2,7 @@
 
 namespace E_commerce.Interfaces
 {
-    public interface IProduct : IRepoistoryPattern<Product>
+    public interface IUser : IRepoistoryPattern<User>
     {
 
     }

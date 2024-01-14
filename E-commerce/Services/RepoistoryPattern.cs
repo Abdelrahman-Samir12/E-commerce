@@ -1,6 +1,7 @@
 ﻿using E_commerce.Interfaces;
 using E_commerce.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq.Expressions;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -15,26 +16,31 @@ namespace E_commerce.Services
             _context = context;
         }
 
-        public async Task<T> Add(T entity)
+        public T Add(T entity)
         {
-            await _context.AddAsync(entity);
+            _context.Add(entity);
             _context.SaveChanges();
             return entity;
         }
 
-        public async Task<IEnumerable<T>> GetAll(string[] includes = null)
+        public bool DoesExist(Expression<Func<T, bool>> expression)
+        {
+            return _context.Set<T>().AsNoTracking().FirstOrDefault(expression) != null;
+        }
+
+        public IEnumerable<T> GetAll(string[] includes = null)
         {
             IQueryable<T> table = _context.Set<T>();
             if (includes != null)
                 foreach (var include in includes)
                     table = table.Include(include);
 
-            return await table.ToListAsync();
+            return table.ToList();
         }
-        public async Task<T> GetById(int id, string[] includes = null)
+        public T GetById(int id, string[] includes = null)
         {
             var data = _context.Set<T>();
-            var entity = await data.FindAsync(id);
+            var entity =  data.Find(id);
             IQueryable<T> data1 = _context.Set<T>();
             if (includes != null)
             {
@@ -44,11 +50,11 @@ namespace E_commerce.Services
                 }
             }
 
-            return data1.Single(e => e == entity);
+            return  data1.SingleOrDefault(e => e == entity);
 
         }
 
-        public async Task<T> GetByName(Expression<Func<T, bool>> predicate, string[] includes = null)
+        public T GetByName(Expression<Func<T, bool>> predicate, string[] includes = null)
         {
             IQueryable<T> data1 = _context.Set<T>();
 
@@ -59,7 +65,7 @@ namespace E_commerce.Services
                     data1 = data1.Include(include);
                 }
             }
-            var entity = await data1.FirstOrDefaultAsync(predicate);
+            var entity =  data1.FirstOrDefault(predicate);
 
             return entity;
 

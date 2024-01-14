@@ -2,12 +2,8 @@
 
 namespace E_commerce.Interfaces
 {
-    public interface ICategory
+    public interface ICategory : IRepoistoryPattern<Category>
     {
-        Task<Category> GetById(int id);
-        Task<Category> GetByName(string name);
-        Task<IEnumerable<Category>> GetAll();
-
-        Task<Category> Add(Category category);
+        public List<Product> GetProductsByCategory(string categoryName);
     }
 }

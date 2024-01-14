@@ -10,6 +10,7 @@ namespace E_commerce.Helpers
             CreateMap<ProductDto, Product>()
                 .ForMember(src => src.Image,opt => opt.Ignore())
                 .ReverseMap();
+            CreateMap<UserDto, User>().ReverseMap();
         }
     }
 }

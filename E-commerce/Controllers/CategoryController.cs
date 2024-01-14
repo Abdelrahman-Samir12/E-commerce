@@ -12,42 +12,64 @@ namespace E_commerce.Controllers
     public class CategoryController : ControllerBase
     {
         private readonly IMapper _mapper;
-        private readonly IRepoistoryPattern<Category> _repoistoryPattern;
-
-        public CategoryController( IMapper mapper, IRepoistoryPattern<Category> repoistoryPattern)
+        private readonly IUnitOfWork _unitOfWork;
+        public CategoryController(IMapper mapper, IUnitOfWork unitOfWork)
         {
             _mapper = mapper;
-            _repoistoryPattern = repoistoryPattern;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddCategory([FromForm]CategoryDto category)
+        public IActionResult AddCategory([FromForm]CategoryDto category)
         {
-            var cat = _mapper.Map<Category>(category);
-            cat = await _repoistoryPattern.Add(cat);
-            return Ok(cat);
+            var exists =  _unitOfWork.Category.DoesExist(c=> c.Name == category.Name);
+            if (!exists)
+            {
+                var cat = _mapper.Map<Category>(category);
+                cat =  _unitOfWork.Category.Add(cat);
+                return Ok(cat);
+            }
+            return BadRequest($"A Category with Name: {category.Name} Already exists");
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public IActionResult GetAll()
         {
-            var categories = await _repoistoryPattern.GetAll();
+            var categories =  _unitOfWork.Category.GetAll();
             return Ok(categories);
         }
         [HttpGet("GetById/{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public IActionResult GetById(int id)
         {
-            
-            var category = await _repoistoryPattern.GetById(id);
+            var category =  _unitOfWork.Category.GetById(id);
+            if(category is null)
+            {
+                return NotFound($"No category with ID: {id} was found!!");
+            }
             return Ok(category);
         }
 
 
         [HttpGet("GetByName/{name}")]
-        public async Task<IActionResult> GetByName(string name)
+        public IActionResult GetByName(string name)
         {
-            var category = await _repoistoryPattern.GetByName(a => a.Name == name);
+            var category =  _unitOfWork.Category.GetByName(a => a.Name == name);
+            if(category is null)
+            {
+                return NotFound($"No category with Name: {name} was found!!");
+            }
             return Ok(category);
         }
+        [HttpGet("GetProductsByCategory/{name}")]
+        public IActionResult GetProductsByCategory(string name)
+        {
+            if ( _unitOfWork.Category.DoesExist(a => a.Name == name))
+            {
+                return Ok(_unitOfWork.Category.GetProductsByCategory(name)
+                    .Select(x => new { x.Id, x.Name, x.Description, x.Price }));
+            }
+            return NotFound($"No category with Name: {name} was found!!");
+        }
+
     }
 }

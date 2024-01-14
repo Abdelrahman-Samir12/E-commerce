@@ -9,6 +9,7 @@ namespace E_commerce.Models
 
         public Role Role { get; set; }
         public ShoppingCart ShoppingCart { get; set; }
+        public string RoleName { get; set; }
 
     }
 }

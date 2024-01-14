@@ -12,42 +12,44 @@ namespace E_commerce.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IMapper _mapper;
-        private readonly IRepoistoryPattern<Product> _repoistoryPattern;
-
-        public ProductsController(IMapper mapper, IRepoistoryPattern<Product> repoistoryPattern)
+        private readonly IUnitOfWork _unitOfWork;
+        private int MaxAllowedImgSize =  1024 * 1024;
+        public ProductsController(IMapper mapper, IUnitOfWork unitOfWork)
         {
             _mapper = mapper;
-            _repoistoryPattern = repoistoryPattern;
+            _unitOfWork = unitOfWork;
         }
         [HttpPost]
-        public async Task<IActionResult> AddProduct([FromForm]ProductDto productDto)
+        public IActionResult AddProduct([FromForm]ProductDto productDto)
         {
+            if(productDto.Image.Length > MaxAllowedImgSize)
+            {
+                return BadRequest("The maximum allowed Image size is 1 MB");
+            }    
             var product = _mapper.Map<Product>(productDto);
             using var dataStream = new MemoryStream();
-            await productDto.Image.CopyToAsync(dataStream);
+            productDto.Image.CopyTo(dataStream);
             product.Image = dataStream.ToArray();
-            product = await _repoistoryPattern.Add(product);
+            product = _unitOfWork.Product.Add(product);
             return Ok(product);
         }
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public IActionResult GetAll()
         {
-            return Ok(await _repoistoryPattern.GetAll( new[] { "Category" }  ));
-           //    return Ok(_repoistoryPattern.test());
+            return Ok( _unitOfWork.Product.GetAll( new[] { "Category" }  ));
         }
 
-
         [HttpGet("GetById/{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public IActionResult GetById(int id)
         {
-            return Ok(await _repoistoryPattern.GetById( id, new[] { "Category" }));
+            return Ok( _unitOfWork.Product.GetById( id, new[] { "Category" }));
         }
 
 
         [HttpGet("GetByName/{Name}")]
-        public async Task<IActionResult> GetByName(string Name)
+        public  IActionResult GetByName(string Name)
         {
-            return Ok(await _repoistoryPattern.GetByName(c => c.Name == Name, new[] { "Category" }));
+            return Ok( _unitOfWork.Product.GetByName(c => c.Name == Name, new[] { "Category" }));
         }
     }
 }

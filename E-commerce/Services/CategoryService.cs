@@ -1,40 +1,23 @@
 ﻿using E_commerce.Interfaces;
 using E_commerce.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace E_commerce.Services
 {
-    public class CategoryService : ICategory
+    public class CategoryService : RepoistoryPattern<Category>, ICategory
     {
         private readonly ApplicationDbContext _context;
 
-        public CategoryService(ApplicationDbContext context)
+        public CategoryService(ApplicationDbContext context): base(context)
         {
             _context = context;
         }
 
-        public async Task<Category> Add(Category category)
+        public List<Product> GetProductsByCategory(string categoryName)
         {
-            await _context.Categories.AddAsync(category);
-            _context.SaveChanges();
-            return category;
+            var category = _context.Categories.Include(p => p.Products).SingleOrDefault(p => p.Name == categoryName);
+            return category.Products;
         }
-
-        public async Task<IEnumerable<Category>> GetAll()
-        {
-            var data = await _context.Categories.ToListAsync();
-
-            return data;
-        }
-
-        public async Task<Category> GetById(int id)
-        {
-            return await _context.Categories.SingleOrDefaultAsync(c => c.Id == id);
-        }
-
-        public async Task<Category> GetByName(string name)
-        {
-            return await _context.Categories.FirstOrDefaultAsync(c => c.Name == name);
-        }
-    }
+    } 
 }
