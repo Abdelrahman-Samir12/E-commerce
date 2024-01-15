@@ -27,7 +27,7 @@ namespace E_commerce.Services
         {
             return _context.Set<T>().AsNoTracking().FirstOrDefault(expression) != null;
         }
-
+        
         public IEnumerable<T> GetAll(string[] includes = null)
         {
             IQueryable<T> table = _context.Set<T>();
@@ -69,6 +69,17 @@ namespace E_commerce.Services
 
             return entity;
 
+        }
+
+        public T GetItemAsNoTracking(Expression<Func<T, bool>> predicate)
+        {
+            return _context.Set<T>().AsNoTracking().FirstOrDefault(predicate);
+        }
+
+        public T Update(T entity)
+        {
+            _context.Update(entity);
+            return entity;
         }
     }
 }

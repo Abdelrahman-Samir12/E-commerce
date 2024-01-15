@@ -1,5 +1,6 @@
 ﻿using E_commerce.Interfaces;
 using E_commerce.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace E_commerce.Services
 {

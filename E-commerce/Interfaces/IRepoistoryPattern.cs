@@ -12,6 +12,7 @@ namespace E_commerce.Interfaces
         IEnumerable<T> GetAll(string[] includes = null);
         T Add(T entity);
         bool DoesExist(Expression<Func<T, bool>> expression);
-         
+        T Update(T entity);
+        T GetItemAsNoTracking(Expression<Func<T, bool>> expression);
     }
 }

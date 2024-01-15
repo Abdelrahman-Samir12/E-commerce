@@ -25,7 +25,12 @@ namespace E_commerce.Controllers
             if(productDto.Image.Length > MaxAllowedImgSize)
             {
                 return BadRequest("The maximum allowed Image size is 1 MB");
-            }    
+            }
+            if(productDto.Image is null)
+            {
+                return BadRequest("Image Must be Not Null");
+
+            }
             var product = _mapper.Map<Product>(productDto);
             using var dataStream = new MemoryStream();
             productDto.Image.CopyTo(dataStream);
@@ -50,6 +55,28 @@ namespace E_commerce.Controllers
         public  IActionResult GetByName(string Name)
         {
             return Ok( _unitOfWork.Product.GetByName(c => c.Name == Name, new[] { "Category" }));
+        }
+        [HttpPut("Update/{id}")]
+        public IActionResult Update(int id, [FromForm] ProductDto productDto)
+        {
+            var prod = _unitOfWork.Product.GetItemAsNoTracking(a => a.Id == id);
+            if(prod is null)
+            {
+                return BadRequest($"No product was found with ID {id}");
+            }
+            prod.Price = productDto.Price == decimal.Zero ? prod.Price : productDto.Price;
+            prod.Name = productDto.Name == "" ? prod.Name : productDto.Name;
+            prod.Amount = productDto.Amount == 0 ? prod.Amount : productDto.Amount;
+            prod.Rate = productDto.Rate == float.MinValue ? prod.Rate : productDto.Rate;
+            prod.Description = productDto.Description == "" ? prod.Description : productDto.Description;
+            if(productDto.Image != null)
+            {
+                using var datastream = new MemoryStream();
+                productDto.Image.CopyTo(datastream);
+                prod.Image = datastream.ToArray();
+            }
+            _unitOfWork.Product.Update(prod);
+            return Ok(prod);
         }
     }
 }
