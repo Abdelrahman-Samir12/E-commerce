@@ -17,7 +17,7 @@ namespace E_commerce.Models
         [ForeignKey("CategoryId")]
         public Category Category { get; set; }
         public int CategoryId { get; set; }
-
+        public List<ShoppingCart>Carts { get; set; }
     }
 
 }

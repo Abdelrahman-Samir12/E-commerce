@@ -4,6 +4,5 @@ namespace E_commerce.Interfaces
 {
     public interface IUser : IRepoistoryPattern<User>
     {
-
     }
 }

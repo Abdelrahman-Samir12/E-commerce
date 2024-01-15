@@ -27,14 +27,35 @@ namespace E_commerce.Controllers
                 user.RoleName = "User";
             else if (userDto.Role == Role.admin)
                 user.RoleName = "Admin";
-            _unitOfWork.User.Add(user);
+    
+            user = _unitOfWork.User.Add(user);
 
+            _unitOfWork.ShoppingCart.CreateNewShoppingCart(user.Id);
             return Ok(user);
         }
         [HttpGet("GetAllUsers")]
         public IActionResult GetAll()
         {
             return Ok(_unitOfWork.User.GetAll());
+        }
+        [HttpPost("AddProductToCart/{UserId}")]
+        public IActionResult AddProductToCart(int UserId, [FromForm] ProductDetalis productDetalis)
+        {
+            var product = _unitOfWork.Product.GetByName(c => c.Name == productDetalis.Name);
+            if (product == null)
+            {
+                return NotFound($"No Product with name {productDetalis.Name} was found");
+            }
+            if(productDetalis.Amount > product.Amount)
+            {
+                return BadRequest("Not available Amount !!");
+            }
+            else
+            {
+                product.Amount = productDetalis.Amount;
+                var cart = _unitOfWork.ShoppingCart.AddItemToCart(UserId, product);
+                return Ok(cart);
+            }
         }
 
     }

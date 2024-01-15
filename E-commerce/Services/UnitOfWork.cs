@@ -10,12 +10,14 @@ namespace E_commerce.Services
         public ICategory Category { get; private set; }
         public IProduct Product { get; private set; }
         public IUser User { get; private set; }
+        public IShoppingCart ShoppingCart { get; private set; }
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;
             Category = new CategoryService(context);
             Product = new ProductService(context);
             User = new UserService(context);
+            ShoppingCart = new ShoppingCartService(context);
         }
 
 
